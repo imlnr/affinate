@@ -14,6 +14,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import ReactSlider from 'react-slider';
 import './App.css'; // Import necessary CSS for slider if required
+import { Slider } from '@mui/material';
 
 function formatTextToSixWordsPerLine(text) {
   const words = text.split(' ');
@@ -163,20 +164,21 @@ function Flow({ zoom }) {
 }
 
 export default function App() {
-  const [zoom, setZoom] = useState(1);
-
+  const [zoom, setZoom] = useState(0.5);
+  // console.log(zoom.target['value']);
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
       <Flow zoom={zoom} />
-      <ReactSlider
+      <Slider
         className="horizontal-slider"
-        thumbClassName="example-thumb"
-        trackClassName="example-track"
+        sx={{ width: "20%" }}
+        step={0.1}
         min={0.5}
         max={2}
-        step={0.1}
-        value={zoom}
-        onChange={(value) => setZoom(value)}
+        defaultValue={zoom}
+        onChange={(value) => setZoom(value.target.value)}
+        valueLabelDisplay='auto'
+        aria-label="Default"
       />
     </div>
   );
