@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# ReactFlow - Example
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a React flow chart example for a Marvel Comics flow chart, showcasing contextual zoom and focus features.
 
 # Screenshots
 
