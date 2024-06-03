@@ -8,6 +8,8 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ![image](https://github.com/imlnr/affinate/assets/82680213/4d27a594-3787-4403-b4c6-9290c4eba682)
 
+![image](https://github.com/imlnr/affinate/assets/82680213/b4ba495b-8344-49b6-b135-de2317abe201)
+
 
 ## Available Scripts
 
