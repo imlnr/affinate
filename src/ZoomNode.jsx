@@ -13,7 +13,7 @@ const ZoomNode = ({ id, data }) => {
         padding: 10,
         border: `2px solid ${borderColor}`,
         backgroundColor: "white",
-        borderRadius: 5,
+        borderRadius: 20,
         width: 250,
         overflow: "hidden",
       }}

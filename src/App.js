@@ -190,7 +190,7 @@ const App = () => {
         ...node,
         data: { ...node.data, focused: node.id === focusedNode },
         style: {
-          filter: zoom === 2.7 && node.id !== focusedNode ? "blur(5px)" : "none",
+          filter: zoom >= 2.7 && node.id !== focusedNode ? "blur(5px)" : "none",
           zIndex:"1"
         },
       }))}
