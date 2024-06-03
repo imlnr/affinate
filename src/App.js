@@ -1,5 +1,6 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import ReactFlow, {
+  ReactFlowProvider,
   MiniMap,
   Controls,
   Background,
@@ -10,8 +11,9 @@ import ReactFlow, {
   Position,
   useReactFlow,
 } from 'reactflow';
-
 import 'reactflow/dist/style.css';
+import ReactSlider from 'react-slider';
+import './App.css'; // Import necessary CSS for slider if required
 
 const initialNodes = [
   { id: '1', position: { x: 750, y: 300 }, data: { label: <><h1>heading 1</h1><p>This is para 1</p></> }, type: 'custom' },
@@ -42,10 +44,10 @@ const CustomNode = ({ data }) => {
 
 const nodeTypes = { custom: CustomNode };
 
-export default function App() {
+function Flow() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { setCenter } = useReactFlow();
+  const { setViewport, project, setCenter } = useReactFlow();
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge({ ...params, sourceHandle: 'right', targetHandle: 'left' }, eds)),
@@ -60,20 +62,46 @@ export default function App() {
   );
 
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        onNodeClick={onNodeClick}
-      >
-        <Controls />
-        <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
-      </ReactFlow>
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      nodeTypes={nodeTypes}
+      onNodeClick={onNodeClick}
+    >
+      <Controls />
+      <MiniMap />
+      <Background variant="dots" gap={12} size={1} />
+    </ReactFlow>
+  );
+}
+
+export default function App() {
+  const [zoom, setZoom] = useState(1);
+
+  return (
+    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+      <Flow zoom={zoom} />
+      {/* <ReactSlider
+        className="horizontal-slider"
+        thumbClassName="example-thumb"
+        trackClassName="example-track"
+        min={0.5}
+        max={2}
+        step={0.1}
+        value={zoom}
+        onChange={(value) => setZoom(value)}
+        renderThumb={(props, state) => <div {...props}>{state.valueNow}</div>}
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '80%',
+        }}
+      /> */}
     </div>
   );
 }
