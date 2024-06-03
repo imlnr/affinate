@@ -1,24 +1,32 @@
-import React, { memo } from 'react';
-import { Handle, useStore, Position } from 'reactflow';
+import React, { memo } from "react";
+import { Handle, Position } from "reactflow";
 
-const Placeholder = () => (
-  <div className="placeholder">
-    <div />
-    <div />
-    <div />
-  </div>
-);
-
-const zoomSelector = (s) => s.transform[2] >= 1.5;
-
-export default memo(({ data }) => {
-  const showContent = useStore(zoomSelector);
+const ZoomNode = ({ id, data }) => {
+  const { zoom = 1, focused, content } = data;
+  const isMinimized = zoom < 0.8;
+  const borderColor = focused ? "blue" : "black";
 
   return (
-    <>
+    <div
+      style={{
+        transform: `scale(${zoom})`,
+        padding: 10,
+        border: `2px solid ${borderColor}`,
+        backgroundColor: "white",
+        borderRadius: 5,
+        width: 250,
+        overflow: "hidden",
+      }}
+    >
       <Handle type="target" position={Position.Left} />
-      {showContent ? data.content : <Placeholder />}
+      {isMinimized ? (
+        <h4>{content.props.children[0].props.children}</h4>
+      ) : (
+        content
+      )}
       <Handle type="source" position={Position.Right} />
-    </>
+    </div>
   );
-});
+};
+
+export default memo(ZoomNode);

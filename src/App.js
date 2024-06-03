@@ -1,215 +1,229 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from "react";
 import ReactFlow, {
   ReactFlowProvider,
-  MiniMap,
-  Controls,
-  Background,
   useNodesState,
   useEdgesState,
   addEdge,
-  Handle,
-  Position,
-  useReactFlow,
-  useStore,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
-import ReactSlider from 'react-slider';
-import './App.css'; // Import necessary CSS for slider if required
-import { Slider } from '@mui/material';
+  MiniMap,
+  Controls,
+  Background,
+} from "reactflow";
+import ZoomNode from "./ZoomNode";
+import "reactflow/dist/style.css";
+import "./index.css";
+import { Slider } from "@mui/material";
 
-function formatTextToSixWordsPerLine(text) {
-  const words = text.split(' ');
-  let formattedText = '';
-  for (let i = 0; i < words.length; i++) {
-    formattedText += words[i] + ' ';
-    if ((i + 1) % 6 === 0) {
-      formattedText += '<br>';
-    }
-  }
-  return formattedText.trim();
-}
-
-const initialText = [
-  "React Flow is a library for building node-based applications. These can be anything from simple static diagrams to data visualisations to complex visual editors. You can implement custom node types and edges and it comes with components like a minimap and viewport controls out of the box",
-  "Sliders reflect a range of values along a bar, from which users may select a single value. They are ideal for adjusting settings such as volume, brightness, or applying image filters"
-];
-
-const initialNodes = [
-  {
-    id: '1',
-    position: { x: 750, y: 300 },
-    data: {
-      label: { __html: `<h1>heading 1</h1><p>${formatTextToSixWordsPerLine(initialText[0])}</p><p>${formatTextToSixWordsPerLine(initialText[1])}</p>` },
-    },
-    type: 'custom',
-  },
-  {
-    id: '2',
-    position: { x: 200, y: 100 },
-    data: {
-      label: { __html: `<h1>heading 2</h1><p>${formatTextToSixWordsPerLine(initialText[0])}</p><p>${formatTextToSixWordsPerLine(initialText[1])}</p>` },
-    },
-    type: 'custom',
-  },
-  {
-    id: '3',
-    position: { x: 200, y: 450 },
-    data: {
-      label: { __html: `<h1>heading 3</h1><p>${formatTextToSixWordsPerLine(initialText[0])}</p><p>${formatTextToSixWordsPerLine(initialText[1])}</p>` },
-    },
-    type: 'custom',
-  },
-  {
-    id: '4',
-    position: { x: 1300, y: -50 },
-    data: {
-      label: { __html: `<h1>heading 4</h1><p>${formatTextToSixWordsPerLine(initialText[0])}</p><p>${formatTextToSixWordsPerLine(initialText[1])}</p>` },
-    },
-    type: 'custom',
-  },
-  {
-    id: '5',
-    position: { x: 1300, y: 300 },
-    data: {
-      label: { __html: `<h1>heading 5</h1><p>${formatTextToSixWordsPerLine(initialText[0])}</p><p>${formatTextToSixWordsPerLine(initialText[1])}</p>` },
-    },
-    type: 'custom',
-  },
-  {
-    id: '6',
-    position: { x: 1300, y: 650 },
-    data: {
-      label: { __html: `<h1>heading 6</h1><p>${formatTextToSixWordsPerLine(initialText[0])}</p><p>${formatTextToSixWordsPerLine(initialText[1])}</p>` },
-    },
-    type: 'custom',
-  },
-];
-
-const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2' },
-  { id: 'e1-3', source: '1', target: '3' },
-  { id: 'e1-4', source: '4', target: '1' },
-  { id: 'e1-5', source: '5', target: '1' },
-  { id: 'e1-6', source: '6', target: '1' },
-];
-const snapGrid = [20, 20];
-
-const Placeholder = () => (
-  <div className="placeholder">
-    <div />
-    <div />
-    <div />
-  </div>
-);
-
-const zoomSelector = (s) => s.transform[2] >= 1;
-
-const CustomNode = ({ data }) => {
-  const showContent = useStore(zoomSelector);
-  return (
-    <div style={{ border: '1px solid', padding: '6px', borderRadius: '5px' }}>
-      <Handle type="source" position={Position.Left} id="left" />
-      {showContent ? <div dangerouslySetInnerHTML={data.label} /> : <Placeholder />}
-      <Handle type="target" position={Position.Right} id="right" />
-    </div>
-  );
+const gridSnap = [20, 20];
+const nodeTypeDefinitions = {
+  zoom: ZoomNode,
 };
 
-const nodeTypes = { custom: CustomNode };
+const nodesInitialState = [
+  {
+    id: "1",
+    type: "zoom",
+    data: {
+      content: (
+        <div>
+          <h4>Marvel Comics</h4>
+          <p>
+            Marvel Comics is an American comic book publisher
+            and the property of The Walt Disney Company since
+            December 31, 2009, and a subsidiary of Disney Publishing
+            Worldwide since March 2023. Marvel was founded in 1939 by
+            Martin Goodman as Timely Comics, and by 1951 had generally
+            become known as Atlas Comics
+          </p>
+        </div>
+      ),
+      zoom: 1,
+    },
+    position: { x: 700, y: 250 },
+  },
+  {
+    id: "2",
+    type: "zoom",
+    data: {
+      content: (
+        <div>
+          <h4>Thor</h4>
+          <p>
+            The son of Odin uses his mighty abilities as
+            the God of Thunder to protect his home Asgard
+            and planet Earth alike.
+          </p>
+        </div>
+      ),
+      zoom: 1,
+    },
+    position: { x: 1200, y: 300 },
+  },
+  {
+    id: "3",
+    type: "zoom",
+    data: {
+      content: (
+        <div>
+          <h4>Black Panther</h4>
+          <p>
+            Black Panther is a 2018 American superhero film based on the Marvel
+            Comics character of the same name. Produced by Marvel Studios and distributed
+            by Walt Disney Studios Motion Pictures.
+          </p>
+        </div>
+      ),
+      zoom: 1,
+    },
+    position: { x: 180, y: 50 },
+  },
+  {
+    id: "4",
+    type: "zoom",
+    data: {
+      content: (
+        <div>
+          <h4>Captain America</h4>
+          <p>
+            Captain America is a superhero created by
+            Joe Simon and Jack Kirby who appears in American
+            comic books published by Marvel Comics.
+          </p>
+        </div>
+      ),
+      zoom: 1,
+    },
+    position: { x: 180, y: 500 },
+  },
+  {
+    id: "5",
+    type: "zoom",
+    data: {
+      content: (
+        <div>
+          <h4>Iron Man</h4>
+          <p>
+            Iron Man is a superhero appearing in American comic
+            books published by Marvel Comics. Co-created by writer
+            and editor Stan Lee, developed by scripter Larry Lieber,
+            and designed by artists Don Heck and Jack Kirby,
+          </p>
+        </div>
+      ),
+      zoom: 1,
+    },
+    position: { x: 1200, y: 20 },
+  },
+  {
+    id: "6",
+    type: "zoom",
+    data: {
+      content: (
+        <div>
+          <h4>Hulk</h4>
+          <p>
+            The Hulk is a superhero appearing in American comic
+            books published by Marvel Comics. Created by writer Stan
+            Lee and artist Jack Kirby, the character first appeared in
+            The Incredible Hulk.
+          </p>
+        </div>
+      ),
+      zoom: 1,
+    },
+    position: { x: 1200, y: 550 },
+  },
+];
 
-function Flow({ zoom }) {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { setCenter, zoomTo, fitView } = useReactFlow();
-  const [selectedNode, setSelectedNode] = useState(null);
+const edgesInitialState = [
+  { id: "e1-2", source: "1", target: "2" },
+  { id: "e1-3", source: "3", target: "1" },
+  { id: "e1-4", source: "4", target: "1" },
+  { id: "e1-5", source: "1", target: "5" },
+  { id: "e1-6", source: "1", target: "6" },
+];
+
+const defaultView = { x: 0, y: 0, zoom: 1 };
+
+const App = () => {
+  const [nodes, setNodes, onNodesChange] = useNodesState(nodesInitialState);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(edgesInitialState);
+  const [focusedNode, setFocusedNode] = useState(null);
+  const [zoom, setZoom] = useState(1);
 
   const onConnect = useCallback(
-    (params) =>
-      setEdges((eds) =>
-        addEdge({ ...params, sourceHandle: 'right', targetHandle: 'left' }, eds)
-      ),
-    [setEdges]
+    (params) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
+    []
   );
 
-  const onNodeClick = useCallback(
-    (event, node) => {
-      setSelectedNode(node.id);
-      setCenter(node.position.x, node.position.y, { zoom: 2, duration: 1000 });
-    },
-    [setCenter]
-  );
+  const onNodeClick = (event, node) => {
+    setFocusedNode(node.id);
+    setZoom(node.data.zoom || 1);
+  };
 
-  useEffect(() => {
-    if (selectedNode) {
-      const node = nodes.find(n => n.id === selectedNode);
-      if (node) {
-        setCenter(node.position.x, node.position.y, { zoom, duration: 1000 });
-      }
-    } else {
-      fitView({ duration: 1000 });
-    }
-  }, [zoom, selectedNode, setCenter, fitView, nodes]);
-
-  useEffect(() => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id !== selectedNode) {
-          const paragraphs = node.data.label.__html.split('</p>');
-          const visibleParagraphs = Math.max(1, Math.floor((zoom - 0.5) * 2));
-          const newLabel = paragraphs.slice(0, visibleParagraphs).join('</p>') + '</p>';
+  const onZoomChange = (event) => {
+    const newZoomLevel = parseFloat(event.target.value);
+    setZoom(newZoomLevel);
+    setNodes((nodes) =>
+      nodes.map((node) => {
+        if (node.id === focusedNode) {
           return {
             ...node,
-            data: {
-              ...node.data,
-              label: { __html: newLabel },
-            },
+            data: { ...node.data, zoom: newZoomLevel },
+          };
+        } else {
+          const minimumZoom = 0.3;
+          const zoomReductionFactor = 0.7;
+          const adjustedZoom = Math.max(minimumZoom, 1 - (newZoomLevel - 1) * zoomReductionFactor);
+          return {
+            ...node,
+            data: { ...node.data, zoom: adjustedZoom },
           };
         }
-        return node;
       })
     );
-  }, [zoom, selectedNode, setNodes]);
+  };
 
   return (
+    <div style={{ height: "100vh" }}>      
     <ReactFlow
-      nodes={nodes.map(node => ({
+      nodes={nodes.map((node) => ({
         ...node,
-        style: node.id === selectedNode ? { border: "2px solid black", borderRadius: "7px" } : { border: '1px solid black', borderRadius: "7px" }
+        data: { ...node.data, focused: node.id === focusedNode },
+        style: {
+          filter: zoom === 3 && node.id !== focusedNode ? "blur(5px)" : "none",
+          zIndex:"1"
+        },
       }))}
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
-      snapGrid={snapGrid}
-      nodeTypes={nodeTypes}
+      nodeTypes={nodeTypeDefinitions}
+      snapToGrid={true}
+      snapGrid={gridSnap}
+      defaultViewport={defaultView}
       onNodeClick={onNodeClick}
+      attributionPosition="top-right"
     >
       <Controls />
       <MiniMap />
       <Background variant="dots" gap={12} size={1} />
     </ReactFlow>
-  );
-}
-
-export default function App() {
-  const [zoom, setZoom] = useState(0.5);
-
-  return (
-    <ReactFlowProvider>
-      <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-        <Flow zoom={zoom} />
+      {focusedNode && (
         <Slider
           className="horizontal-slider"
-          sx={{ width: "20%", position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)' }}
+          sx={{ width: "20%", position: "absolute", bottom: 20, left: "50%", transform: "translateX(-50%)" }}
           step={0.1}
           min={0.5}
-          max={2}
-          defaultValue={zoom}
-          onChange={(event, value) => setZoom(value)}
-          valueLabelDisplay='auto'
+          max={3}
+          value={zoom}
+          onChange={onZoomChange}
+          valueLabelDisplay="auto"
           aria-label="Zoom Slider"
         />
-      </div>
-    </ReactFlowProvider>
+      )}
+    </div>
   );
-}
+};
+
+export default App;
