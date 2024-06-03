@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   MiniMap,
@@ -98,10 +98,11 @@ const CustomNode = ({ data }) => {
 
 const nodeTypes = { custom: CustomNode };
 
-function Flow() {
+function Flow({ zoom }) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { setCenter } = useReactFlow();
+  const { setCenter, zoomTo, fitView } = useReactFlow();
+  const [selectedNode, setSelectedNode] = useState(null);
 
   const onConnect = useCallback(
     (params) =>
@@ -111,16 +112,42 @@ function Flow() {
     [setEdges]
   );
 
+  // const onNodeClick = useCallback(
+  //   (event, node) => {
+  //     setSelectedNode(node.id);
+  //     setCenter(node.position.x, node.position.y, {
+  //       zoom: 1.5,
+  //       duration: 1000,
+  //     });
+  //   },
+  //   [setCenter]
+  // );
   const onNodeClick = useCallback(
     (event, node) => {
-      setCenter(node.position.x, node.position.y, { zoom: 1.5, duration: 1000 });
+      setSelectedNode(node.id)
+      setCenter(node.position.x, node.position.y, { border: "2px solid red", zoom: 2, duration: 1000 });
     },
     [setCenter]
   );
 
+  // Apply zoom when zoom state changes
+  useEffect(() => {
+    if (selectedNode) {
+      const node = nodes.find(n => n.id === selectedNode);
+      if (node) {
+        setCenter(node.position.x, node.position.y, { zoom, duration: 1000 });
+      }
+    } else {
+      fitView({ duration: 1000 });
+    }
+  }, [zoom, selectedNode, setCenter, fitView, nodes]);
+
   return (
     <ReactFlow
-      nodes={nodes}
+      nodes={nodes.map(node => ({
+        ...node,
+        style: node.id === selectedNode ? { zIndex: 10 } : { opacity: 0.7 }
+      }))}
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
@@ -136,9 +163,21 @@ function Flow() {
 }
 
 export default function App() {
+  const [zoom, setZoom] = useState(1);
+
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      <Flow />
+      <Flow zoom={zoom} />
+      <ReactSlider
+        className="horizontal-slider"
+        thumbClassName="example-thumb"
+        trackClassName="example-track"
+        min={0.5}
+        max={2}
+        step={0.1}
+        value={zoom}
+        onChange={(value) => setZoom(value)}
+      />
     </div>
   );
 }
