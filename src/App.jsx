@@ -8,6 +8,7 @@ import ReactFlow, {
   addEdge,
   Handle,
   Position,
+  useReactFlow,
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
@@ -21,11 +22,17 @@ const initialNodes = [
   { id: '6', position: { x: 1300, y: 600 }, data: { label: <><h1>heading 6</h1><p>This is para 6</p></> }, type: 'custom' }
 ];
 
-const initialEdges = [{ id: 'e1-2', source: '1', target: '2' },{ id: 'e1-3', source: '1', target: '3' },{ id: 'e1-4', source: '4', target: '1' },{ id: 'e1-5', source: '5', target: '1' },{ id: 'e1-6', source: '6', target: '1' }];
+const initialEdges = [
+  { id: 'e1-2', source: '1', target: '2' },
+  { id: 'e1-3', source: '1', target: '3' },
+  { id: 'e1-4', source: '4', target: '1' },
+  { id: 'e1-5', source: '5', target: '1' },
+  { id: 'e1-6', source: '6', target: '1' }
+];
 
 const CustomNode = ({ data }) => {
   return (
-    <div style={{border:"1px solid",padding:"6px",borderRadius:"5px"}}>
+    <div style={{ border: "1px solid", padding: "6px", borderRadius: "5px" }}>
       <Handle type="source" position={Position.Left} id="left" />
       {data.label}
       <Handle type="target" position={Position.Right} id="right" />
@@ -38,10 +45,18 @@ const nodeTypes = { custom: CustomNode };
 export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const { setCenter } = useReactFlow();
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge({ ...params, sourceHandle: 'right', targetHandle: 'left' }, eds)),
-    [setEdges],
+    [setEdges]
+  );
+
+  const onNodeClick = useCallback(
+    (event, node) => {
+      setCenter(node.position.x, node.position.y, { zoom: 1.5, duration: 800 });
+    },
+    [setCenter]
   );
 
   return (
@@ -53,6 +68,7 @@ export default function App() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        onNodeClick={onNodeClick}
       >
         <Controls />
         <MiniMap />
